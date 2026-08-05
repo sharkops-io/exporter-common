@@ -1,0 +1,18 @@
+include:
+  - project: 'sharkops/gitlab-ci-common-config'
+    ref: master
+    file: 'security/secret-scan.yml'
+
+stages: [test]
+
+lint:
+  stage: test
+  image: golangci/golangci-lint:v2.12.0
+  script:
+    - golangci-lint run --timeout 5m
+
+test:
+  stage: test
+  image: golang:1.26
+  script:
+    - go test ./... -race -count=1
