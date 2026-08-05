@@ -33,8 +33,9 @@ const MaxResponseBytes = 32 << 20
 var ErrResponseTooLarge = fmt.Errorf("response body exceeds %d bytes", MaxResponseBytes)
 
 // ReadBodyLimited reads at most MaxResponseBytes from r, returning
-// ErrResponseTooLarge if there was more to read. It is exported so clients that
-// issue their own requests (internal/unifios) enforce the same bound.
+// ErrResponseTooLarge if there was more to read. It is exported so callers
+// that issue their own requests, rather than going through GetBytes, can
+// enforce the same bound.
 func ReadBodyLimited(r io.Reader) ([]byte, error) {
 	// limit+1 so a body of exactly the limit is fine while one byte more is
 	// detectable — io.ReadAll over a LimitReader alone cannot tell the two apart.

@@ -1,5 +1,6 @@
 // Package testutil provides test helpers shared across this repo's packages.
-// It lives under internal/ so it stays out of the public API.
+// These helpers are exported for use by exporters built on this module; they
+// are test-only and not part of any runtime collection path.
 package testutil
 
 import "github.com/prometheus/client_golang/prometheus"

@@ -1,5 +1,5 @@
-// Package metric holds the one intermediate representation this exporter uses
-// between a device payload and Prometheus exposition.
+// Package metric holds the one intermediate representation exporters built on
+// this module use between a device payload and Prometheus exposition.
 //
 // It exists so the mapping logic ported from another-app compiles unchanged. It
 // is deliberately smaller than its ancestor: another-app needed a registry-wide
@@ -95,9 +95,10 @@ func (s Sample) Metric() (prometheus.Metric, error) {
 // later duplicates itself; see collector.Collect.
 //
 // The label keys are deliberately not part of the signature. Every metric name
-// this exporter emits carries a fixed set of keys (they are literals in the
-// mappers), so values alone are already a faithful series identity, and this
-// matches the guard another-app' metrics bridge used for the same purpose.
+// a caller emits is expected to carry a fixed set of keys (they are literals
+// in the mapping code), so values alone are already a faithful series
+// identity, and this matches the guard another-app' metrics bridge used for
+// the same purpose.
 func (s Sample) Signature() string {
 	_, values := sortedLabels(s.Labels)
 	return s.Name + "\x00" + strings.Join(values, "\x00")
