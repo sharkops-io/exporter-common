@@ -35,15 +35,26 @@ type Collector struct {
 	durationDesc *prometheus.Desc
 }
 
+// New wraps a Source with a timeout and self-monitoring series.
 func New(src Source, timeout time.Duration) *Collector {
+	return NewWithLabels(src, timeout, nil)
+}
+
+// NewWithLabels is New with constant labels applied to the self-monitoring
+// series. Two Collectors sharing a Namespace MUST use it: their
+// <ns>_scrape_collector_success gauges are otherwise label-identical, and
+// because this Collector is unchecked (see Describe) the registry does not
+// reject that at Register time -- it fails the whole Gather instead, taking
+// every other metric on the endpoint with it.
+func NewWithLabels(src Source, timeout time.Duration, constLabels prometheus.Labels) *Collector {
 	ns := src.Namespace()
 	return &Collector{
 		src:     src,
 		timeout: timeout,
 		successDesc: prometheus.NewDesc(ns+"_scrape_collector_success",
-			"Whether the last collection for this collector succeeded (1) or failed (0).", nil, nil),
+			"Whether the last collection for this collector succeeded (1) or failed (0).", nil, constLabels),
 		durationDesc: prometheus.NewDesc(ns+"_scrape_collector_duration_seconds",
-			"Duration of the last collection for this collector, in seconds.", nil, nil),
+			"Duration of the last collection for this collector, in seconds.", nil, constLabels),
 	}
 }
 

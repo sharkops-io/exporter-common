@@ -235,3 +235,57 @@ func TestPanickingCollectorDoesNotBlankTheOther(t *testing.T) {
 		t.Error("unas_scrape_collector_success missing after a panic in the other collector")
 	}
 }
+
+func TestNewWithLabelsDisambiguatesTwoCollectorsSharingANamespace(t *testing.T) {
+	reg := prometheus.NewRegistry()
+	src := func(name string) Source { return stubSource{name: name} }
+
+	reg.MustRegister(NewWithLabels(src("palworld"), time.Second, prometheus.Labels{"collector": "palworld"}))
+	reg.MustRegister(NewWithLabels(src("satisfactory"), time.Second, prometheus.Labels{"collector": "satisfactory"}))
+
+	got, err := reg.Gather()
+	if err != nil {
+		t.Fatalf("Gather: %v", err)
+	}
+
+	var found int
+	for _, mf := range got {
+		if mf.GetName() == "gameserver_scrape_collector_success" {
+			found = len(mf.GetMetric())
+		}
+	}
+	if found != 2 {
+		t.Errorf("gameserver_scrape_collector_success series = %d, want 2", found)
+	}
+}
+
+func TestNewKeepsExistingLabellessBehaviour(t *testing.T) {
+	reg := prometheus.NewRegistry()
+	reg.MustRegister(New(stubSource{name: "unas"}, time.Second))
+
+	got, err := reg.Gather()
+	if err != nil {
+		t.Fatalf("Gather: %v", err)
+	}
+	for _, mf := range got {
+		if mf.GetName() == "unas_scrape_collector_success" {
+			if l := mf.GetMetric()[0].GetLabel(); len(l) != 0 {
+				t.Errorf("labels = %v, want none", l)
+			}
+			return
+		}
+	}
+	t.Fatal("unas_scrape_collector_success not found")
+}
+
+type stubSource struct{ name string }
+
+func (s stubSource) Namespace() string {
+	if s.name == "unas" {
+		return "unas"
+	}
+	return "gameserver"
+}
+func (s stubSource) Collect(context.Context) ([]metric.Sample, error) {
+	return []metric.Sample{metric.Gauge("gameserver_up", "up", 1, map[string]string{"game": s.name})}, nil
+}
