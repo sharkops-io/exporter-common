@@ -7,7 +7,7 @@ stages: [test]
 
 lint:
   stage: test
-  image: golangci/golangci-lint:v2.12.0
+  image: golangci/golangci-lint:v2.12.2
   script:
     - golangci-lint run --timeout 5m
 
