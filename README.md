@@ -21,18 +21,27 @@ imported across a module boundary.
   `Collect(ctx) ([]metric.Sample, error)`) to `prometheus.Collector`, with a
   per-collector timeout and the `<namespace>_scrape_collector_success` /
   `_duration_seconds` self-monitoring series.
+- **`config`** — the flag/env plumbing every exporter shares: common flags,
+  `--help` as a distinct signal, log handler construction, and the
+  flag-beats-environment precedence rule. Device-shaped config stays local to
+  each exporter.
 - **`testutil`** — `MetricSlice`, a fixed-slice `prometheus.Collector` for
   asserting exposition output without any collector machinery.
 
-## What didn't move
+## What moved, and what didn't
 
-`config` was deliberately **not** extracted. Its generic half (flag/env
-parsing, precedence rules) is entangled with a struct whose fields include
-`UNASEnabled` and `Protect protect.Config` — device-specific concerns baked
-into what would otherwise be shared code. Rather than guess at the seam
-between "generic config plumbing" and "unas-protect-exporter-specific
-config," that split should be revealed by a second consumer actually needing
-it.
+`config` was extracted in v0.2.0, when `adguard-exporter` became the second
+consumer and revealed the seam the earlier note was waiting for. The package
+owns the flags every exporter shares — `--web.listen-address`,
+`--web.telemetry-path`, `--collector.timeout`, `--http.timeout`,
+`--log.level`, `--log.format` — plus `ErrHelpRequested`, the log-level
+mapping, `LogHandler`, and the flag-beats-environment `Fallback` helper.
+
+The **device half stays in each exporter**, deliberately. The two consumers
+need different shapes: `unas-protect-exporter` is a fixed pair of optional
+collectors with cross-field credential validation, `adguard-exporter` is an
+N-instance list. Generalising over both would recreate exactly the
+entanglement that kept this package unextracted in the first place.
 
 ## Compatibility
 
