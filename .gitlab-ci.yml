@@ -2,17 +2,11 @@ include:
   - project: 'sharkops/gitlab-ci-common-config'
     ref: master
     file: 'security/secret-scan.yml'
+  # lint + test. Extracted 2026-08-24 - this repo and four sibling exporters
+  # carried byte-identical copies, which had already drifted (exporter-common
+  # hardcoded golang:1.26 while the rest used ${GO_VERSION}).
+  - project: 'sharkops/gitlab-ci-common-config'
+    ref: master
+    file: 'go/ci.yml'
 
 stages: [test]
-
-lint:
-  stage: test
-  image: golangci/golangci-lint:v2.12.2
-  script:
-    - golangci-lint run --timeout 5m
-
-test:
-  stage: test
-  image: golang:1.26
-  script:
-    - go test ./... -race -count=1
