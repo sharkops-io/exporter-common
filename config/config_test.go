@@ -10,7 +10,7 @@ import (
 
 	"github.com/alecthomas/kingpin/v2"
 
-	"gitlab.com/sharkops/exporters/exporter-common/config"
+	"github.com/sharkops-io/exporter-common/config"
 )
 
 func newApp() *kingpin.Application {

@@ -1,11 +1,15 @@
 # exporter-common
 
-Shared plumbing for `sharkops/exporters/*` Prometheus exporters. It exists so
+Shared plumbing for the [sharkops-io](https://github.com/sharkops-io) Prometheus exporters. It exists so
 that a second exporter can reuse this logic instead of copying it — the
 packages here started as `internal/*` inside
-[`unas-protect-exporter`](https://gitlab.com/sharkops/exporters/unas-protect-exporter)
+[`unas-protect-exporter`](https://github.com/sharkops-io/unas-protect-exporter)
 and were promoted to a standalone module because `internal/` cannot be
 imported across a module boundary.
+
+```sh
+go get github.com/sharkops-io/exporter-common@latest
+```
 
 ## Packages
 
@@ -49,3 +53,7 @@ Consumers should track the same pinned versions of
 `github.com/prometheus/client_golang` and `github.com/prometheus/common` this
 module uses (see `go.mod`) — `metric.Sample.Metric()` relies on
 version-specific validation behaviour documented in `metric/sample.go`.
+
+## License
+
+Apache License 2.0. See [LICENSE](LICENSE).

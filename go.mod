@@ -1,4 +1,4 @@
-module gitlab.com/sharkops/exporters/exporter-common
+module github.com/sharkops-io/exporter-common
 
 go 1.26.5
 
