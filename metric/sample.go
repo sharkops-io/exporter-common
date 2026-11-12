@@ -1,11 +1,12 @@
 // Package metric holds the one intermediate representation exporters built on
 // this module use between a device payload and Prometheus exposition.
 //
-// It exists so the mapping logic ported from another-app compiles unchanged. It
-// is deliberately smaller than its ancestor: another-app needed a registry-wide
-// snapshot map, plus help-text and label-dimension guards, because many
-// integrations shared one unchecked collector and could disagree about a name.
-// Here each collector owns its own output, so none of that applies.
+// It exists so mapping logic ported from an earlier client compiles unchanged.
+// It is deliberately smaller than its ancestor: that client needed a
+// registry-wide snapshot map, plus help-text and label-dimension guards,
+// because many integrations shared one unchecked collector and could disagree
+// about a name. Here each collector owns its own output, so none of that
+// applies.
 //
 // Duplicate-series detection does still apply, and is the one guard that
 // survived the port: a duplicate can arise WITHIN a single device payload
@@ -97,8 +98,8 @@ func (s Sample) Metric() (prometheus.Metric, error) {
 // The label keys are deliberately not part of the signature. Every metric name
 // a caller emits is expected to carry a fixed set of keys (they are literals
 // in the mapping code), so values alone are already a faithful series
-// identity, and this matches the guard another-app' metrics bridge used for
-// the same purpose.
+// identity, and this matches the guard the earlier client's metrics bridge
+// used for the same purpose.
 func (s Sample) Signature() string {
 	_, values := sortedLabels(s.Labels)
 	return s.Name + "\x00" + strings.Join(values, "\x00")
